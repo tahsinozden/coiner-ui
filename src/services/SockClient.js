@@ -6,9 +6,6 @@ const SockClient = (props) => {
         <SockJsClient url='/ws' topics={['/user/queue/notify']}
                       onMessage={(msg) => {
                           props.onMessage(msg);
-                      }}
-                      ref={(client) => {
-                          props.clientRef = client
                       }}/>
     );
 };
