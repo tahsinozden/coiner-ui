@@ -1,12 +1,11 @@
 import React, {Component} from 'react';
 import './App.css';
-import Table from "react-bootstrap/es/Table";
-import Button from "react-bootstrap/es/Button";
 import ListGroup from "react-bootstrap/es/ListGroup";
 import axios from 'axios';
 import Header from "./components/Header";
 import SockClient from "./services/SockClient";
 import SubscriptionForm from "./components/SubscriptionForm";
+import SubscriptionsTable from "./components/SubscriptionsTable";
 
 class App extends Component {
 
@@ -15,11 +14,13 @@ class App extends Component {
         notifications: [],
         currencyPairs: []
     };
+
     setStateProp = (name, value) => {
         const state = {...this.state};
         state[name] = value;
         this.setState(state);
     };
+
     handleNotification = (notification) => {
         console.log(notification);
         let message = "Currency Pair: " + notification.currencyPair
@@ -31,6 +32,7 @@ class App extends Component {
         state.notifications.push(message);
         this.setState(state);
     };
+
     loadSubscriptions = () => {
         axios.get('/subscriptions')
             .then(res => {
@@ -38,6 +40,7 @@ class App extends Component {
                 console.log(res);
             });
     };
+
     loadCurrencyPairs = () => {
         axios.get('/currency-pairs')
             .then(res => {
@@ -45,6 +48,7 @@ class App extends Component {
                 console.log(res);
             });
     };
+
     subscribe = (pair, limit) => {
         axios.put(`/alert?pair=${pair}&limit=${limit}`)
             .then(res => {
@@ -52,6 +56,7 @@ class App extends Component {
                 this.loadSubscriptions();
             });
     };
+
     unsubscribe = (subscription) => {
         axios.delete(`/alert?pair=${subscription.currencyPair}`)
             .then(res => {
@@ -59,12 +64,6 @@ class App extends Component {
                 this.loadSubscriptions();
             });
     };
-
-    constructor(props) {
-        super(props);
-        this.selectedPair = React.createRef();
-        this.limit = React.createRef();
-    }
 
     componentDidMount() {
         this.loadSubscriptions();
@@ -80,26 +79,6 @@ class App extends Component {
             );
         }
 
-        let currencyPairs = [];
-        for (let pair of this.state.currencyPairs) {
-            currencyPairs.push(
-                <option>{pair}</option>
-            );
-        }
-
-        let subscriptions = [];
-        for (let subscription of this.state.subscriptions) {
-            subscriptions.push(
-                <tr key={subscription.id}>
-                    <td>{subscription.id}</td>
-                    <td>{subscription.currencyPair}</td>
-                    <td>{subscription.threshold}</td>
-                    <td><Button variant="secondary" onClick={() => this.unsubscribe(subscription)}>Unsubsribe</Button>
-                    </td>
-                </tr>
-            );
-        }
-
         return (
             <div className="App">
 
@@ -108,28 +87,14 @@ class App extends Component {
 
                 <div className="container-fluid" style={{marginTop: '80px'}}>
                     <h2>Welcome user</h2>
-
                     <SubscriptionForm currencyPairs={this.state.currencyPairs}
-                                      onSubmit={this.subscribe}
-                    />
-
+                                      onSubmit={this.subscribe}/>
                     <hr/>
-                    <h4>Your Subscriptions</h4>
-                    <Table striped bordered hover>
-                        <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Currency Pair</th>
-                            <th>Limit</th>
-                            <th>Operation</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {subscriptions}
-                        </tbody>
-                    </Table>
 
+                    <SubscriptionsTable subscriptions={this.state.subscriptions}
+                                        onUnsubscribe={this.unsubscribe}/>
                     <hr/>
+
                     <h4>Subscription Alerts</h4>
                     <ListGroup>
                         {notifications}
