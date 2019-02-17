@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import './App.css';
-import ListGroup from "react-bootstrap/es/ListGroup";
 import axios from 'axios';
 import Header from "./components/Header";
 import SockClient from "./services/SockClient";
 import SubscriptionForm from "./components/SubscriptionForm";
 import SubscriptionsTable from "./components/SubscriptionsTable";
+import SubscriptionAlerts from "./components/SubscriptionAlerts";
 
 class App extends Component {
 
@@ -30,7 +30,7 @@ class App extends Component {
 
         let state = {...this.state};
         state.notifications.push(message);
-        this.setState(state);
+        this.setStateProp('notifications', state.notifications);
     };
 
     loadSubscriptions = () => {
@@ -71,17 +71,8 @@ class App extends Component {
     }
 
     render() {
-
-        let notifications = [];
-        for (let item of this.state.notifications) {
-            notifications.push(
-                <ListGroup.Item key={this.state.notifications.indexOf(item)}>{item}</ListGroup.Item>
-            );
-        }
-
         return (
             <div className="App">
-
                 <SockClient onMessage={this.handleNotification}/>
                 <Header/>
 
@@ -95,13 +86,8 @@ class App extends Component {
                                         onUnsubscribe={this.unsubscribe}/>
                     <hr/>
 
-                    <h4>Subscription Alerts</h4>
-                    <ListGroup>
-                        {notifications}
-                    </ListGroup>
+                    <SubscriptionAlerts notifications={this.state.notifications}/>
                 </div>
-
-
             </div>
         );
     }
