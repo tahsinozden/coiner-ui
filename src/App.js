@@ -1,13 +1,12 @@
 import React, {Component} from 'react';
 import './App.css';
-import Navbar from "react-bootstrap/es/Navbar";
-import Nav from "react-bootstrap/es/Nav";
-import Form from "react-bootstrap/es/Form";
 import Table from "react-bootstrap/es/Table";
 import Button from "react-bootstrap/es/Button";
-import SockJsClient from 'react-stomp';
 import ListGroup from "react-bootstrap/es/ListGroup";
 import axios from 'axios';
+import Header from "./components/Header";
+import SockClient from "./services/SockClient";
+import SubscriptionForm from "./components/SubscriptionForm";
 
 class App extends Component {
 
@@ -46,13 +45,7 @@ class App extends Component {
                 console.log(res);
             });
     };
-    subscribe = () => {
-        const pair = this.selectedPair.current.value;
-        const limit = this.limit.current.value;
-        if (pair === '' || limit === '') {
-            return;
-        }
-
+    subscribe = (pair, limit) => {
         axios.put(`/alert?pair=${pair}&limit=${limit}`)
             .then(res => {
                 console.log(res);
@@ -109,42 +102,16 @@ class App extends Component {
 
         return (
             <div className="App">
-                <SockJsClient url='/ws' topics={['/user/queue/notify']}
-                              onMessage={(msg) => {
-                                  this.handleNotification(msg);
-                              }}
-                              ref={(client) => {
-                                  this.clientRef = client
-                              }}/>
 
-                <Navbar bg="dark" variant="dark">
-                    <Navbar.Brand href="#home">{'Coiner'}</Navbar.Brand>
-                    <Nav className="mr-auto">
-                        <Nav.Link href="logout">Logout</Nav.Link>
-                    </Nav>
-                </Navbar>
+                <SockClient onMessage={this.handleNotification}/>
+                <Header/>
+
                 <div className="container-fluid" style={{marginTop: '80px'}}>
                     <h2>Welcome user</h2>
 
-                    <h4>Subscribe for a notification</h4>
-                    <Form>
-                        <Form.Group controlId="subscriptionForm.CurrencyPairs">
-                            <Form.Label>Currency Pairs</Form.Label>
-                            <Form.Control as="select"
-                                // onChange={this.onPairChange.bind(this)}
-                                          ref={this.selectedPair}>
-                                {currencyPairs}
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group controlId="subscriptionForm.LimitInput">
-                            <Form.Label>Limit</Form.Label>
-                            <Form.Control type="text"
-                                          placeholder="notification limit"
-                                // onChange={this.onLimitChange.bind(this)}
-                                          ref={this.limit}/>
-                        </Form.Group>
-                        <Button variant="secondary" onClick={this.subscribe}>Submit</Button>
-                    </Form>
+                    <SubscriptionForm currencyPairs={this.state.currencyPairs}
+                                      onSubmit={this.subscribe}
+                    />
 
                     <hr/>
                     <h4>Your Subscriptions</h4>
