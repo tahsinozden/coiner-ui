@@ -4,9 +4,7 @@ import SockJsClient from 'react-stomp';
 const SockClient = (props) => {
     return (
         <SockJsClient url='/ws' topics={['/user/queue/notify']}
-                      onMessage={(msg) => {
-                          props.onMessage(msg);
-                      }}/>
+                      onMessage={(msg) => props.onMessage(msg)}/>
     );
 };
 
