@@ -1,5 +1,5 @@
 # coiner-ui
-a ReactJS implementation of the front-end of this project https://github.com/tahsinozden/coiner
+a ReactJS implementation of the front-end of the project https://github.com/tahsinozden/coiner
 
 ## build
 - `npm install create-react-app`
