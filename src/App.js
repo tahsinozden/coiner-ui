@@ -11,28 +11,72 @@ import axios from 'axios';
 
 class App extends Component {
 
+    state = {
+        subscriptions: [],
+        notifications: [],
+        currencyPairs: []
+    };
+    setStateProp = (name, value) => {
+        const state = {...this.state};
+        state[name] = value;
+        this.setState(state);
+    };
+    handleNotification = (notification) => {
+        console.log(notification);
+        let message = "Currency Pair: " + notification.currencyPair
+            + ", Limit: " + notification.threshold
+            + ", CurrentValue: " + notification.currentValue
+            + ", Timestamp: " + notification.timestamp;
+
+        let state = {...this.state};
+        state.notifications.push(message);
+        this.setState(state);
+    };
+    loadSubscriptions = () => {
+        axios.get('/subscriptions')
+            .then(res => {
+                this.setStateProp('subscriptions', res.data);
+                console.log(res);
+            });
+    };
+    loadCurrencyPairs = () => {
+        axios.get('/currency-pairs')
+            .then(res => {
+                this.setStateProp('currencyPairs', res.data);
+                console.log(res);
+            });
+    };
+    subscribe = () => {
+        const pair = this.selectedPair.current.value;
+        const limit = this.limit.current.value;
+        if (pair === '' || limit === '') {
+            return;
+        }
+
+        axios.put(`/alert?pair=${pair}&limit=${limit}`)
+            .then(res => {
+                console.log(res);
+                this.loadSubscriptions();
+            });
+    };
+    unsubscribe = (subscription) => {
+        axios.delete(`/alert?pair=${subscription.currencyPair}`)
+            .then(res => {
+                console.log(res);
+                this.loadSubscriptions();
+            });
+    };
+
     constructor(props) {
         super(props);
         this.selectedPair = React.createRef();
         this.limit = React.createRef();
     }
 
-    state = {
-        subscriptions: [],
-        notifications: [],
-        currencyPairs: []
-    };
-
     componentDidMount() {
         this.loadSubscriptions();
         this.loadCurrencyPairs();
     }
-
-    setStateProp = (name, value) => {
-        const state = {...this.state};
-        state[name] = value;
-        this.setState(state);
-    };
 
     render() {
 
@@ -57,7 +101,8 @@ class App extends Component {
                     <td>{subscription.id}</td>
                     <td>{subscription.currencyPair}</td>
                     <td>{subscription.threshold}</td>
-                    <td><Button variant="secondary" onClick={() => this.unsubscribe(subscription)}>Unsubsribe</Button></td>
+                    <td><Button variant="secondary" onClick={() => this.unsubscribe(subscription)}>Unsubsribe</Button>
+                    </td>
                 </tr>
             );
         }
@@ -65,8 +110,12 @@ class App extends Component {
         return (
             <div className="App">
                 <SockJsClient url='/ws' topics={['/user/queue/notify']}
-                              onMessage={(msg) => { this.handleNotification(msg);}}
-                              ref={ (client) => { this.clientRef = client }} />
+                              onMessage={(msg) => {
+                                  this.handleNotification(msg);
+                              }}
+                              ref={(client) => {
+                                  this.clientRef = client
+                              }}/>
 
                 <Navbar bg="dark" variant="dark">
                     <Navbar.Brand href="#home">{'Coiner'}</Navbar.Brand>
@@ -82,7 +131,7 @@ class App extends Component {
                         <Form.Group controlId="subscriptionForm.CurrencyPairs">
                             <Form.Label>Currency Pairs</Form.Label>
                             <Form.Control as="select"
-                                          // onChange={this.onPairChange.bind(this)}
+                                // onChange={this.onPairChange.bind(this)}
                                           ref={this.selectedPair}>
                                 {currencyPairs}
                             </Form.Control>
@@ -91,7 +140,7 @@ class App extends Component {
                             <Form.Label>Limit</Form.Label>
                             <Form.Control type="text"
                                           placeholder="notification limit"
-                                          // onChange={this.onLimitChange.bind(this)}
+                                // onChange={this.onLimitChange.bind(this)}
                                           ref={this.limit}/>
                         </Form.Group>
                         <Button variant="secondary" onClick={this.subscribe}>Submit</Button>
@@ -109,7 +158,7 @@ class App extends Component {
                         </tr>
                         </thead>
                         <tbody>
-                            {subscriptions}
+                        {subscriptions}
                         </tbody>
                     </Table>
 
@@ -124,56 +173,6 @@ class App extends Component {
             </div>
         );
     }
-
-    handleNotification = (notification) => {
-        console.log(notification);
-        let message = "Currency Pair: " + notification.currencyPair
-            + ", Limit: " + notification.threshold
-            + ", CurrentValue: " + notification.currentValue
-            + ", Timestamp: " + notification.timestamp;
-
-        let state = {...this.state};
-        state.notifications.push(message);
-        this.setState(state);
-    };
-
-    loadSubscriptions = () => {
-        axios.get('/subscriptions')
-            .then(res => {
-                this.setStateProp('subscriptions', res.data);
-                console.log(res);
-            });
-    };
-
-    loadCurrencyPairs = () => {
-        axios.get('/currency-pairs')
-            .then(res => {
-                this.setStateProp('currencyPairs', res.data);
-                console.log(res);
-            });
-    };
-
-    subscribe = () => {
-        const pair = this.selectedPair.current.value;
-        const limit = this.limit.current.value;
-        if (pair === '' || limit === '') {
-            return;
-        }
-
-        axios.put(`/alert?pair=${pair}&limit=${limit}`)
-            .then(res => {
-                console.log(res);
-                this.loadSubscriptions();
-            });
-    };
-
-    unsubscribe = (subscription) => {
-        axios.delete(`/alert?pair=${subscription.currencyPair}`)
-            .then(res => {
-                console.log(res);
-                this.loadSubscriptions();
-            });
-    };
 }
 
 export default App;
