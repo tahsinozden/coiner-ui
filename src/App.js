@@ -6,13 +6,15 @@ import SockClient from "./services/SockClient";
 import SubscriptionForm from "./components/SubscriptionForm";
 import SubscriptionsTable from "./components/SubscriptionsTable";
 import SubscriptionAlerts from "./components/SubscriptionAlerts";
+import InfoModal from "./components/InfoModal";
 
 class App extends Component {
 
     state = {
         subscriptions: [],
         notifications: [],
-        currencyPairs: []
+        currencyPairs: [],
+        infoMessage: {title: '', message: '', show: false}
     };
 
     setStateProp = (name, value) => {
@@ -54,6 +56,10 @@ class App extends Component {
             .then(res => {
                 console.log(res);
                 this.loadSubscriptions();
+                this.showMessage("Success", "Subscription successful!");
+            })
+            .catch(error => {
+                this.showMessage("Error", "Subscription failed!");
             });
     };
 
@@ -62,7 +68,19 @@ class App extends Component {
             .then(res => {
                 console.log(res);
                 this.loadSubscriptions();
+                this.showMessage("Success", "Unsubscription successful!");
+            })
+            .catch(error => {
+                this.showMessage("Error", "Unsubscription failed!");
             });
+    };
+
+    showMessage = (title, message) => {
+        const infoMessage = this.state.infoMessage;
+        infoMessage.title = title;
+        infoMessage.message = message;
+        infoMessage.show = true;
+        this.setStateProp('infoMessage', infoMessage);
     };
 
     componentDidMount() {
@@ -87,6 +105,11 @@ class App extends Component {
                     <hr/>
 
                     <SubscriptionAlerts notifications={this.state.notifications}/>
+
+                    <InfoModal title={this.state.infoMessage.title}
+                               message={this.state.infoMessage.message}
+                               show={this.state.infoMessage.show}
+                               onHide={() => this.setStateProp('infoMessage', {show: false})}/>
                 </div>
             </div>
         );
