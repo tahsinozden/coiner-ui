@@ -14,7 +14,8 @@ class App extends Component {
         subscriptions: [],
         notifications: [],
         currencyPairs: [],
-        infoMessage: {title: '', message: '', show: false}
+        infoMessage: {title: '', message: '', show: false},
+        currentUserName: ''
     };
 
     setStateProp = (name, value) => {
@@ -51,6 +52,14 @@ class App extends Component {
             });
     };
 
+
+    loadCurrentUserName = () => {
+        axios.get('/users/current-user')
+            .then(res => {
+                this.setStateProp('currentUserName', res.data);
+            });
+    };
+
     subscribe = (pair, limit) => {
         axios.put(`/alert?pair=${pair}&limit=${limit}`)
             .then(res => {
@@ -84,6 +93,7 @@ class App extends Component {
     };
 
     componentDidMount() {
+        this.loadCurrentUserName();
         this.loadSubscriptions();
         this.loadCurrencyPairs();
     }
@@ -95,7 +105,7 @@ class App extends Component {
                 <Header/>
 
                 <div className="container-fluid" style={{marginTop: '80px'}}>
-                    <h2>Welcome user</h2>
+                    <h2>Welcome {this.state.currentUserName}</h2>
                     <SubscriptionForm currencyPairs={this.state.currencyPairs}
                                       onSubmit={this.subscribe}/>
                     <hr/>
