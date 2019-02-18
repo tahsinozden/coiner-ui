@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import axios from 'axios';
 import Header from "./components/Header";
-import SockClient from "./services/SockClient";
+import SockClient from "./components/SockClient";
 import SubscriptionForm from "./components/SubscriptionForm";
 import SubscriptionsTable from "./components/SubscriptionsTable";
 import SubscriptionAlerts from "./components/SubscriptionAlerts";
