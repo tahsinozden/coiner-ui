@@ -5,8 +5,8 @@ import Button from "react-bootstrap/es/Button";
 class SubscriptionForm extends React.Component {
 
     submit = () => {
-        const pair = this.selectedPair.current.value;
-        const limit = this.limit.current.value;
+        const pair = this.state.currencyPair;
+        const limit = this.state.limit;
         if (pair === '' || limit === '') {
             return;
         }
@@ -14,10 +14,17 @@ class SubscriptionForm extends React.Component {
         this.props.onSubmit(pair, limit);
     };
 
+    handleOnChange = (event) => {
+        const { target: {name, value} } = event;
+        this.setState({ [name]: value });
+    };
+
     constructor(props) {
         super(props);
-        this.selectedPair = React.createRef();
-        this.limit = React.createRef();
+        this.state = {
+            currencyPair: '',
+            limit: ''
+        };
     }
 
     render() {
@@ -35,15 +42,19 @@ class SubscriptionForm extends React.Component {
                     <Form.Group controlId="subscriptionForm.CurrencyPairs">
                         <Form.Label>Currency Pairs</Form.Label>
                         <Form.Control as="select"
-                                      ref={this.selectedPair}>
+                                      name="currencyPair"
+                                      value={this.state.currencyPair}
+                                      onChange={this.handleOnChange}>
                             {currencyPairs}
                         </Form.Control>
                     </Form.Group>
                     <Form.Group controlId="subscriptionForm.LimitInput">
                         <Form.Label>Limit</Form.Label>
                         <Form.Control type="text"
+                                      name="limit"
+                                      value={this.state.limit}
                                       placeholder="notification limit"
-                                      ref={this.limit}/>
+                                      onChange={this.handleOnChange}/>
                     </Form.Group>
                     <Button variant="secondary" onClick={this.submit}>Submit</Button>
                 </Form>
